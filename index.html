@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8" />
-<title>Bezig met scannen...</title>
+<title>System Scan</title>
 
 <style>
     body {
@@ -32,24 +32,23 @@
         to { opacity: 0.2; }
     }
 
+    /* FAKE PROGRESSBAR */
     #fakeProgress {
         width: 100%;
         height: 20px;
         background: #222;
         margin-top: 20px;
         border: 1px solid #0f0;
-        position: relative;
         overflow: hidden;
     }
-
     #bar {
         width: 0%;
         height: 100%;
         background: #0f0;
-        transition: width 0.3s;
+        transition: width 0.2s;
     }
 
-    /* ================= NEP DOWNLOAD POPUP ================= */
+    /* ================= FAKE DOWNLOAD POPUP ================= */
     #popup {
         position: fixed;
         width: 350px;
@@ -67,23 +66,13 @@
         box-shadow: 0 0 20px red;
     }
 
-    #popup h2 {
-        margin: 0;
-        font-size: 22px;
-        color: #c00;
-    }
-
-    #popup p {
-        font-size: 16px;
-    }
-
     #dlbar {
         width: 100%;
         height: 15px;
         background: #bbb;
         margin-top: 10px;
-        overflow: hidden;
         border: 1px solid #333;
+        overflow: hidden;
     }
 
     #dlfill {
@@ -92,98 +81,146 @@
         background: #39f;
         transition: width 0.2s;
     }
+
+    /* ================= HACKER TERMINAL POPUP ================= */
+    #hackPopup {
+        position: fixed;
+        width: 600px;
+        height: 350px;
+        background: black;
+        color: #0f0;
+        border: 2px solid #0f0;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 15px;
+        font-family: Courier New, monospace;
+        font-size: 14px;
+        display: none;
+        z-index: 99999;
+        overflow-y: hidden;
+        box-shadow: 0 0 25px #0f0;
+    }
+    #hackContent {
+        white-space: pre;
+        height: 100%;
+        overflow-y: auto;
+    }
 </style>
 </head>
 
 <body>
-
-<div id="console">Initializing system scan...</div>
+<div id="console">Booting system...</div>
 <div id="fakeProgress"><div id="bar"></div></div>
 
-<!-- NEP DOWNLOAD POPUP -->
+<!-- Fake download popup -->
 <div id="popup">
-    <h2>Download gestart</h2>
+    <h2 style="margin:0;color:#c00;">Download gestart</h2>
     <p>Bestand: <b>system_fix_patch.exe</b></p>
     <div id="dlbar"><div id="dlfill"></div></div>
-    <p style="margin-top:10px; color:#c00;">Sluit deze pagina niet!</p>
+    <p style="margin-top:10px;color:#c00;">Niet sluiten...</p>
+</div>
+
+<!-- Hacker terminal popup -->
+<div id="hackPopup">
+    <div id="hackContent"></div>
 </div>
 
 <script>
-const lines = [
-    "Loading modules...",
-    "Connecting to server...",
-    "Scanning systeem...",
-    "Verdachte bestanden gevonden.",
-    "Bestand: troll.exe — STATUS: <span class='red'>GEVAARLIJK</span>",
-    "Bestand: partyvirus.bat — STATUS: <span class='red'>GEVAARLIJK</span>",
-    "Bestand: koekjesgenerator.dll — STATUS: Onbekend",
-    "Bezig met verwijderen...",
-    "<span class='red blink'>FOUT! Kan bestand niet verwijderen...</span>",
-    "Download vereist om systeem te repareren...",
-    "<span class='red blink'>DOWNLOAD START...</span>"
-];
+/* ================= Hacker Popup Logic ================= */
+function showHackerPopup() {
+    const popup = document.getElementById("hackPopup");
+    const content = document.getElementById("hackContent");
 
-let index = 0;
-const consoleBox = document.getElementById("console");
-const bar = document.getElementById("bar");
+    popup.style.display = "block";
 
-function nextLine() {
-    if (index < lines.length) {
-        consoleBox.innerHTML += "\n" + lines[index];
-        bar.style.width = ((index + 1) / lines.length * 100) + "%";
+    let fastLines = 0;
+    const baseLines = [
+        "CONNECTING TO REMOTE NODE...",
+        "ACCESSING SYSTEM REGISTRY...",
+        "INJECTING PROCESS...",
+        "OPENING BACKDOOR PORT 4482...",
+        "CAPTURING KEYSTROKES...",
+        "UPLOADING DATA TO SERVER..."
+    ];
 
-        // Trigger nep download popup
-        if (lines[index].includes("DOWNLOAD START")) {
-            showFakeDownload();
-        }
-
-        index++;
-        setTimeout(nextLine, 600 + Math.random() * 600);
-    } else {
-        // eindscherm
-        setTimeout(() => {
-            document.body.innerHTML = `
-                <h1 style="color:red; text-align:center; font-size:50px;">
-                    SYSTEM FAILURE
-                </h1>
-                <p style="text-align:center; color:white; font-size:25px;">
-                    Grapje 😂 Alles is veilig.  
-                </p>
-            `;
-        }, 3500);
+    function randomCode() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>!?/=+-";
+        let out = "";
+        for (let i = 0; i < 60; i++) out += chars[Math.floor(Math.random() * chars.length)];
+        return out;
     }
+
+    let interval = setInterval(() => {
+        let line = Math.random() < 0.2 ?
+            baseLines[Math.floor(Math.random() * baseLines.length)] :
+            randomCode();
+
+        content.innerHTML += line + "\n";
+        content.scrollTop = content.scrollHeight;
+
+        fastLines++;
+        if (fastLines > 150) {
+            clearInterval(interval);
+            content.innerHTML += "\nPROCESS COMPLETE.\nCLOSING...";
+            setTimeout(() => popup.style.display = "none", 2000);
+        }
+    }, 30);
 }
 
-nextLine();
-
-
-/* ================= Fake Download Popup Logic ================= */
+/* ================= Fake Download Popup ================= */
 function showFakeDownload() {
     const popup = document.getElementById("popup");
     const dlfill = document.getElementById("dlfill");
 
     popup.style.display = "block";
+    let p = 0;
 
-    let progress = 0;
+    let dl = setInterval(() => {
+        p += Math.random() * 20;
+        if (p > 100) p = 100;
+        dlfill.style.width = p + "%";
 
-    let dlInterval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress > 100) progress = 100;
-
-        dlfill.style.width = progress + "%";
-
-        if (progress === 100) {
-            clearInterval(dlInterval);
+        if (p === 100) {
+            clearInterval(dl);
             setTimeout(() => {
-                popup.innerHTML = `
-                    <h2 style="color:green;">Download voltooid</h2>
-                    <p>Bestand geïnstalleerd.</p>
-                    <p>(Niet echt 😉)</p>
-                `;
-            }, 500);
+                popup.innerHTML = "<h2 style='color:green;'>Download voltooid</h2><p>(Niet echt 😉)</p>";
+            }, 300);
         }
+    }, 300);
+}
+
+/* ================= Fake Background Console ================= */
+function startConsole() {
+    const consoleBox = document.getElementById("console");
+    const bar = document.getElementById("bar");
+
+    let lines = [
+        "Scanning systeem...",
+        "Bestand gevonden: worm.dll",
+        "Bestand gevonden: backdoor.sys",
+        "<span class='red'>FOUT! Kan bestand niet verwijderen</span>",
+        "<span class='red blink'>AUTOMATISCHE DOWNLOAD VEREIST</span>"
+    ];
+
+    let i = 0;
+    let interval = setInterval(() => {
+        consoleBox.innerHTML += "\n" + lines[i];
+        bar.style.width = ((i + 1) / lines.length * 100) + "%";
+        i++;
+
+        if (i >= lines.length) clearInterval(interval);
     }, 400);
 }
+
+/* ================= MAIN: triggers after 2 seconds ================= */
+
+setTimeout(() => {
+    startConsole();
+    showHackerPopup();
+    showFakeDownload();
+}, 2000);
+
 </script>
 </body>
 </html>
