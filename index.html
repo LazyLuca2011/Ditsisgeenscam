@@ -1,61 +1,189 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bram is homo</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8" />
+<title>Bezig met scannen...</title>
+
+<style>
     body {
-      margin: 0;
-      overflow: hidden;
-      background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
-      background-size: 600% 600%;
-      animation: bgmove 10s infinite alternate;
-      font-family: Comic Sans MS, cursive;
-      color: white;
-      text-align: center;
+        background: black;
+        color: #0f0;
+        font-family: "Courier New", monospace;
+        overflow: hidden;
+        padding: 20px;
+        font-size: 20px;
     }
-    @keyframes bgmove {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+
+    #console {
+        white-space: pre-line;
     }
-    h1 {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 60px;
-      text-shadow: 0 0 20px black;
-      z-index: 10;
+
+    .red {
+        color: red;
+        font-weight: bold;
     }
-    .emoji {
-      position: absolute;
-      font-size: 40px;
-      animation: float 5s infinite;
+
+    .blink {
+        animation: blink 0.4s infinite alternate;
     }
-    @keyframes float {
-      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-      50% { transform: translateY(-100px) rotate(180deg); opacity: 0.6; }
-      100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+
+    @keyframes blink {
+        from { opacity: 1; }
+        to { opacity: 0.2; }
     }
-  </style>
+
+    #fakeProgress {
+        width: 100%;
+        height: 20px;
+        background: #222;
+        margin-top: 20px;
+        border: 1px solid #0f0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #bar {
+        width: 0%;
+        height: 100%;
+        background: #0f0;
+        transition: width 0.3s;
+    }
+
+    /* ================= NEP DOWNLOAD POPUP ================= */
+    #popup {
+        position: fixed;
+        width: 350px;
+        height: 180px;
+        background: #eee;
+        color: black;
+        border: 2px solid #333;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        z-index: 9999;
+        box-shadow: 0 0 20px red;
+    }
+
+    #popup h2 {
+        margin: 0;
+        font-size: 22px;
+        color: #c00;
+    }
+
+    #popup p {
+        font-size: 16px;
+    }
+
+    #dlbar {
+        width: 100%;
+        height: 15px;
+        background: #bbb;
+        margin-top: 10px;
+        overflow: hidden;
+        border: 1px solid #333;
+    }
+
+    #dlfill {
+        width: 0%;
+        height: 100%;
+        background: #39f;
+        transition: width 0.2s;
+    }
+</style>
 </head>
+
 <body>
-  <h1>Bram is een homo</h1>
-  <script>
-    const emojis = ['💥', '🎉', '🌈', '💚', '⭐', '🔥', '🦄', '🍀', '😎', '💫'];
-    for (let i = 0; i < 50; i++) {
-      const el = document.createElement('div');
-      el.className = 'emoji';
-      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      el.style.left = Math.random() * 100 + 'vw';
-      el.style.top = Math.random() * 100 + 'vh';
-      el.style.animationDelay = Math.random() * 5 + 's';
-      document.body.appendChild(el);
+
+<div id="console">Initializing system scan...</div>
+<div id="fakeProgress"><div id="bar"></div></div>
+
+<!-- NEP DOWNLOAD POPUP -->
+<div id="popup">
+    <h2>Download gestart</h2>
+    <p>Bestand: <b>system_fix_patch.exe</b></p>
+    <div id="dlbar"><div id="dlfill"></div></div>
+    <p style="margin-top:10px; color:#c00;">Sluit deze pagina niet!</p>
+</div>
+
+<script>
+const lines = [
+    "Loading modules...",
+    "Connecting to server...",
+    "Scanning systeem...",
+    "Verdachte bestanden gevonden.",
+    "Bestand: troll.exe — STATUS: <span class='red'>GEVAARLIJK</span>",
+    "Bestand: partyvirus.bat — STATUS: <span class='red'>GEVAARLIJK</span>",
+    "Bestand: koekjesgenerator.dll — STATUS: Onbekend",
+    "Bezig met verwijderen...",
+    "<span class='red blink'>FOUT! Kan bestand niet verwijderen...</span>",
+    "Download vereist om systeem te repareren...",
+    "<span class='red blink'>DOWNLOAD START...</span>"
+];
+
+let index = 0;
+const consoleBox = document.getElementById("console");
+const bar = document.getElementById("bar");
+
+function nextLine() {
+    if (index < lines.length) {
+        consoleBox.innerHTML += "\n" + lines[index];
+        bar.style.width = ((index + 1) / lines.length * 100) + "%";
+
+        // Trigger nep download popup
+        if (lines[index].includes("DOWNLOAD START")) {
+            showFakeDownload();
+        }
+
+        index++;
+        setTimeout(nextLine, 600 + Math.random() * 600);
+    } else {
+        // eindscherm
+        setTimeout(() => {
+            document.body.innerHTML = `
+                <h1 style="color:red; text-align:center; font-size:50px;">
+                    SYSTEM FAILURE
+                </h1>
+                <p style="text-align:center; color:white; font-size:25px;">
+                    Grapje 😂 Alles is veilig.  
+                </p>
+            `;
+        }, 3500);
     }
-  </script>
+}
+
+nextLine();
+
+
+/* ================= Fake Download Popup Logic ================= */
+function showFakeDownload() {
+    const popup = document.getElementById("popup");
+    const dlfill = document.getElementById("dlfill");
+
+    popup.style.display = "block";
+
+    let progress = 0;
+
+    let dlInterval = setInterval(() => {
+        progress += Math.random() * 20;
+        if (progress > 100) progress = 100;
+
+        dlfill.style.width = progress + "%";
+
+        if (progress === 100) {
+            clearInterval(dlInterval);
+            setTimeout(() => {
+                popup.innerHTML = `
+                    <h2 style="color:green;">Download voltooid</h2>
+                    <p>Bestand geïnstalleerd.</p>
+                    <p>(Niet echt 😉)</p>
+                `;
+            }, 500);
+        }
+    }, 400);
+}
+</script>
 </body>
 </html>
